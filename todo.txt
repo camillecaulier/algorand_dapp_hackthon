@@ -1,0 +1,50 @@
+TODO
+Read networks part of Reach   https://docs.reach.sh/networks/
+Read rock-paper-scissors tutorial ? https://docs.reach.sh/tut/rps/
+Check how NFTs are implemented in Reach (is launchToken sufficient? check NFT example)
+make smart contract structure (sarting with JS command line interface on DevNet)
+Understand what opting in and out means
+Check out algosdk documentation (available functions)
+
+Do we really have to use algosdk or is the fact that we use the Algorand connector enough?
+
+
+LINKS
+good explanations of Sandbox
+https://developer.algorand.org/articles/introducing-sandbox-quick-way-get-started-algorand/
+https://developer.algorand.org/tutorials/exploring-the-algorand-sandbox/
+
+basics on WebApp
+https://docs.reach.sh/tut/overview/
+
+Useful Reach tutorial to understand basic principles (takes long time to read tho)
+https://docs.reach.sh/tut/wfs/ (Wisdom For Sale)
+explains basics, how to set connector, command line interface with args, units, cancelling a transaction, views (before attaching)
+
+very useful functions for frontend (will be used for sure, especially the first half)
+https://docs.reach.sh/frontend/#js_stdlib.launchToken
+
+Examples of Reach codes
+https://github.com/reach-sh/reach-lang/tree/master/examples
+
+Search 'algosdk' to find examples using Algorand
+
+Web App example using wallets in browser + illustrating video
+https://github.com/reach-sh/reach-lang/tree/8f41a2ae17220041ba365274dd32ae7c96b11f2e/examples/overview-react
+https://www.youtube.com/watch?v=jHEKIMNvs-o
+
+Example with NFTs and opting in and out and timeouts and parallelReduce and invariants
+https://developer.algorand.org/docs/get-started/dapps/reach/
+https://github.com/algorand/reach-auction
+
+Random Example
+https://www.youtube.com/watch?v=uIdyNo-vJ1Y
+https://github.com/reach-sh/reach-lang/tree/master/examples/nim
+
+
+
+
+NOTES
+REACH_CONNECTOR_MODE env variable to be set
+use walletconnect (if browser-based dapp) -> lets user choose wallet
+(do we need wallets for non browser-based dapps?)
