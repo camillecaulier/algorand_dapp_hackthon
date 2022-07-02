@@ -6,14 +6,17 @@ const commonInteract = {
   reportPayment: Fun([UInt], Null),
 };
 
+const Params = Tuple(Token, UInt, UInt);
+
 const ownerInteract = {
   ...commonInteract,
-  price: UInt,
-  card: Bytes(128),
+  
+  getSale: Fun([], Params),
   reportReady: Fun([UInt], Null),
 };
 const customerInteract = {
   ...commonInteract,
+  seeParams: Fun([Token, UInt], Null),
   confirmPurchase: Fun([UInt], Bool),
   reportCard: Fun([Bytes(128)], Null)
 };
@@ -27,26 +30,36 @@ export const main = Reach.App(() => {
   const A = Participant('Administrator', adminInteract);
   init();
 
-  O.only(() => { const price = declassify(interact.price); });
-  O.publish(price);
-  O.interact.reportReady(price);
+  O.only(() => { 
+    const [ nftId, reservePrice, lenInBlocks ] = declassify(interact.getSale());
+  }); //get the params and create NFT
+  
+  O.publish(nftId, reservePrice, lenInBlocks);
+  O.interact.reportReady(reservePrice);
   commit();
 
-  C.only(() => { const willBuy = declassify(interact.confirmPurchase(price)); });
+  O.pay([[1, nftId]]); //the NFT is in the contract
+  commit();
+
+  C.only(() => { 
+    interact.seeParams(nftId, reservePrice);
+    const willBuy = declassify(interact.confirmPurchase(reservePrice)); 
+  });
   C.publish(willBuy);
   if (!willBuy) {
     commit();
-    each([O, C], () => interact.reportCancellation());
-    exit();
+    //each([O, C], () => interact.reportCancellation());
+
+    //exit();
   } else {
     commit();
   }
-  C.pay(price);
-  each([O, C], () => interact.reportPayment(price));
+  C.pay(reservePrice);
+  each([O, C], () => interact.reportPayment(reservePrice));
   commit();
-  O.only(() => { const wisdom = declassify(interact.card); });
-  O.publish(wisdom);
-  transfer(price).to(O);
+  O.publish(); //to change
+  transfer(reservePrice).to(O);
+  transfer([[1, nftId]]).to(C);
   commit();
 
   exit();
