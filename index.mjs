@@ -32,8 +32,10 @@ const auStr = stdlib.atomicUnit;
 const showBalance = async (acc) => console.log(`Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`);
 const startingBalance = stdlib.parseCurrency(100); //converted to microAlgos
 
-//var theNFT;
+const accac = await stdlib.newTestAccount(startingBalance);
+const anNFT = await stdlib.launchToken(accac, "bruh", "NFT", { supply: 1 });
 
+var theNFT;
 
 const commonInteract = (role) => ({
   reportCancellation: () => { 
@@ -58,20 +60,27 @@ if (role === 'owner') {
   const ownerInteract = {
     ...commonInteract(role),
     reportFee: (fee) => console.log(`The fee for uploading your card is ${fee} %.`),
-    price: await ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res)),
-    name: await ask.ask(`What is the name of your card ? :`, (a) => {return a;}),
-    size: await ask.ask(`What is the size of your card ? :`, (a) => {return a;}),
-    calculateFee: (fee, lenInBlocks) => {
-      const feeSum = fee/100*lenInBlocks;
-      console.log(`You have to pay ${feeSum} ${suStr} to upload your card.`);
-      return feeSum;
+    price: () => ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res)),
+    name: () => ask.ask(`What is the name of your card ? :`, (a) => {return a;}),
+    size: () => {
+      const a = ask.ask(`What is the size of your card ? :`, (a) => {return a;});
+      return a;
     },
-    getSale: async (name) => {
+    hey: async () => {
+      console.log(`hey`);
+      console.log(`Contract info: ${JSON.stringify(await ctc.getInfo())}`);
+    },
+    getSale: async (nftname) => {
 
       console.log("");
 
       console.log(`Uploading Yu-Gi-Oh card...`);
-      const theNFT = await stdlib.launchToken(accO, name, "NFT", { supply: 1 });
+      console.log(`${nftname}`);
+      console.log(`${typeof nftname}`);
+      const copy = nftname.toString().slice();
+      console.log(copy);
+      console.log(`${typeof copy}`);
+      const theNFT = await stdlib.launchToken(accO, `${nftname}`, "NFT", { supply: 1 });
       console.log("Upload succesful!")
 
       console.log("");
@@ -81,6 +90,11 @@ if (role === 'owner') {
     reportReady: async (price) => {
       console.log(`Your Yu-Gi-Oh card is for sale at ${toSU(price)} ${suStr}.`);
       console.log(`Contract info: ${JSON.stringify(await ctc.getInfo())}`);
+    },
+    calculateFee: (fee, lenInBlocks) => {
+      const feeSum = Math.floor(fee/100*lenInBlocks);
+      console.log(`You have to pay ${feeSum} ${suStr} to upload your card.`);
+      return feeSum;
     },
     reportRetrieval: () => {console.log("The card is your possession.");},
   };
@@ -103,8 +117,12 @@ if (role === 'owner') {
       const buy = await ask.ask(`Do you want to purchase this card for ${toSU(price)} ${suStr}?`, ask.yesno);
       return buy;
     },
-    leave: async () => {
-      //await theNFT.optOut(acc);
+    leave: async (nftId) => {
+      console.log(typeof anNFT);
+      console.log(anNFT);
+      console.log(anNFT.id);
+      console.log(anNFT === anNFT.id);
+      await anNFT.id.optOut(acc);
       leaving = true;},
     reportCard: (card) => console.log(`You can now use your new ${card} card !`),
   };
@@ -117,9 +135,12 @@ if (role === 'owner') {
 
   await showBalance(acc);
 } else { //administrator (needs to get a fee for people using the website)
+  
+  
+
   const adminInteract = {
     ...commonInteract,
-    publishFee: await ask.ask(`What percentage would you like for the fee ? (in %)`, (a) => (a))
+    publishFee: async () => await ask.ask(`What percentage would you like for the fee ? (in %)`, (a) => (a))
   };
 
   const acc = await stdlib.newTestAccount(startingBalance);

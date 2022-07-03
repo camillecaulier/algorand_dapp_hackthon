@@ -11,20 +11,21 @@ const Params = Tuple(Token, UInt, UInt, Bytes(128));
 const ownerInteract = {
   ...commonInteract,
   reportFee: Fun([UInt], Null),
-  price: UInt,
-  name: Bytes(128),
-  size: UInt,
+  price: Fun([], UInt),
+  name: Fun([], Bytes(32)),
+  size: Fun([], UInt),
+  hey: Fun([], Null),
   calculateFee: Fun([UInt, UInt], UInt),
-  getSale: Fun([Bytes(128)], Token),
+  getSale: Fun([Bytes(32)], Token),
   reportReady: Fun([UInt], Null),
   reportRetrieval: Fun([], Null),
 };
 const customerInteract = {
   ...commonInteract,
-  seeParams: Fun([Bytes(128), Token, UInt], Null),
+  seeParams: Fun([Bytes(32), Token, UInt], Null),
   confirmPurchase: Fun([UInt], Bool),
-  leave: Fun([], Null),
-  reportCard: Fun([Bytes(128)], Null)
+  leave: Fun([Token], Null),
+  reportCard: Fun([Bytes(32)], Null)
 };
 const adminInteract = {
   ...commonInteract,
@@ -39,28 +40,30 @@ export const main = Reach.App(() => {
 
 
   O.only(() => { 
-    const reservePrice = declassify(interact.price);
-    const nftname = declassify(interact.name);
-    const lenInBlocks = declassify(interact.size);
+    const reservePrice = declassify(interact.price());
+    const nftname = declassify(interact.name());
+    const lenInBlocks = declassify(interact.size());
+    
   }); //get the params and create NFT
 
   O.publish(reservePrice, lenInBlocks, nftname);
-  
   commit();
 
-  O.only(() => { 
-    const nftId = declassify(interact.getSale(nftname));
-  });
+  O.only(() => {
+    interact.hey();
+  })
 
   A.only(() => {const fee = declassify(interact.publishFee());});
   A.publish(fee);
   commit();
 
-  O.publish(nftId);
 
-  commit();
-
+  O.only(() => { 
+    const nftId = declassify(interact.getSale(nftname));
+  });
   
+  O.publish(nftId);
+  commit();
 
   O.only(() => {
     interact.reportReady(reservePrice);
@@ -82,7 +85,7 @@ export const main = Reach.App(() => {
   if (!willBuy) {
     commit();
     C.only(() => { //to opt out
-      interact.leave();
+      interact.leave(nftId);
     })
     each([O, C], () => interact.reportCancellation());
     O.publish();
