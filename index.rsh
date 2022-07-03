@@ -11,9 +11,9 @@ const Params = Tuple(Token, UInt, UInt, Bytes(128));
 const ownerInteract = {
   ...commonInteract,
   reportFee: Fun([UInt], Null),
-  price: Fun([],UInt),
-  name: Fun([], Bytes(128)),
-  size: Fun([],UInt),
+  price: UInt,
+  name: Bytes(128),
+  size: UInt,
   calculateFee: Fun([UInt, UInt], UInt),
   getSale: Fun([Bytes(128)], Token),
   reportReady: Fun([UInt], Null),
@@ -37,20 +37,30 @@ export const main = Reach.App(() => {
   const A = Participant('Administrator', adminInteract);
   init();
 
+
+  O.only(() => { 
+    const reservePrice = declassify(interact.price);
+    const nftname = declassify(interact.name);
+    const lenInBlocks = declassify(interact.size);
+  }); //get the params and create NFT
+
+  O.publish(reservePrice, lenInBlocks, nftname);
+  
+  commit();
+
+  O.only(() => { 
+    const nftId = declassify(interact.getSale(nftname));
+  });
+
   A.only(() => {const fee = declassify(interact.publishFee());});
   A.publish(fee);
   commit();
 
-  O.only(() => { 
-    const reservePrice = declassify(interact.price());
-    const name = declassify(interact.name());
-    const lenInBlocks = declassify(interact.size());
+  O.publish(nftId);
 
+  commit();
 
-    const nftId = declassify(interact.getSale(name));
-  }); //get the params and create NFT
-
-  O.publish(nftId, reservePrice, lenInBlocks, name);
+  
 
   O.only(() => {
     interact.reportReady(reservePrice);
@@ -58,7 +68,6 @@ export const main = Reach.App(() => {
     const feeSum = declassify(interact.calculateFee(fee, lenInBlocks));
   });
   
-  commit();
 
   //pay for the upload
 
@@ -66,7 +75,7 @@ export const main = Reach.App(() => {
   commit();
 
   C.only(() => { 
-    interact.seeParams(name, nftId, reservePrice);
+    interact.seeParams(nftname, nftId, reservePrice);
     const willBuy = declassify(interact.confirmPurchase(reservePrice)); 
   });
   C.publish(willBuy);
@@ -89,7 +98,7 @@ export const main = Reach.App(() => {
   transfer(reservePrice).to(O);
   each([O, C], () => interact.reportTransfer(reservePrice));
   transfer([[1, nftId]]).to(C);
-  C.only(() => interact.reportCard(name));
+  C.only(() => interact.reportCard(nftname));
   commit();
 
   exit();

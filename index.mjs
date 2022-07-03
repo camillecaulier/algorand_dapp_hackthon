@@ -32,7 +32,7 @@ const auStr = stdlib.atomicUnit;
 const showBalance = async (acc) => console.log(`Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`);
 const startingBalance = stdlib.parseCurrency(100); //converted to microAlgos
 
-var theNFT;
+//var theNFT;
 
 
 const commonInteract = (role) => ({
@@ -58,9 +58,9 @@ if (role === 'owner') {
   const ownerInteract = {
     ...commonInteract(role),
     reportFee: (fee) => console.log(`The fee for uploading your card is ${fee} %.`),
-    price: async () => await ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res)),
-    name: async () => await ask.ask(`What is the name of your card ? :`, (a) => {return a;}),
-    size: async () =>  await ask.ask(`What is the size of your card ? :`, (a) => {return a;}),
+    price: await ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res)),
+    name: await ask.ask(`What is the name of your card ? :`, (a) => {return a;}),
+    size: await ask.ask(`What is the size of your card ? :`, (a) => {return a;}),
     calculateFee: (fee, lenInBlocks) => {
       const feeSum = fee/100*lenInBlocks;
       console.log(`You have to pay ${feeSum} ${suStr} to upload your card.`);
@@ -71,12 +71,12 @@ if (role === 'owner') {
       console.log("");
 
       console.log(`Uploading Yu-Gi-Oh card...`);
-      theNFT = await stdlib.launchToken(accO, name, "NFT", { supply: 1 });
+      const theNFT = await stdlib.launchToken(accO, name, "NFT", { supply: 1 });
       console.log("Upload succesful!")
 
       console.log("");
 
-      return [ theNFT.id, stdlib.parseCurrency(price), size, name ]
+      return theNFT.id;
     },
     reportReady: async (price) => {
       console.log(`Your Yu-Gi-Oh card is for sale at ${toSU(price)} ${suStr}.`);
