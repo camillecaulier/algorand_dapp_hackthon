@@ -1,9 +1,8 @@
 import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 import { ask } from '@reach-sh/stdlib';
-//import { ALGO_WalletConnect as WalletConnect } from '@reach-sh/stdlib';
 
-
+//Handle execution arguments
 if (process.argv.length < 3 || ['owner', 'customer', 'admin'].includes(process.argv[2]) == false) {
   console.log('Usage: reach run index [owner|customer|admin]');
   process.exit(0);
@@ -15,16 +14,7 @@ console.log(`Your role is ${role}.`);
 const stdlib = loadStdlib(process.env);
 console.log(`The consensus network is ${stdlib.connector}.`);
 
-var leaving = false;
-
-//stdlib.setWalletFallback(stdlib.walletFallback({
-  //providerEnv: 'TestNet', WalletConnect }));
-
-//stdlib.setProviderByName('TestNet');
-
-//should we add a timeout?
-//use clawback?
-
+//functions for handling (representations of) currencies
 const toAU = (su) => stdlib.parseCurrency(su);
 const toSU = (au) => stdlib.formatCurrency(au, 4);
 const suStr = stdlib.standardUnit;
@@ -32,125 +22,130 @@ const auStr = stdlib.atomicUnit;
 const showBalance = async (acc) => console.log(`Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`);
 const startingBalance = stdlib.parseCurrency(100); //converted to microAlgos
 
-const accac = await stdlib.newTestAccount(startingBalance);
-const anNFT = await stdlib.launchToken(accac, "bruh", "NFT", { supply: 1 });
-
-var theNFT;
-
-const commonInteract = (role) => ({
-  reportCancellation: () => { 
-    console.log("");
-    console.log(`${role == 'customer' ? 'You' : 'The customer'} cancelled the purchase.`); 
+const commonInteract = {
+  reportFeeTransfer: (feeSum) => {
+    console.log(`${role == 'owner' ? 'You' : 'The owner'} paid ${toSU(feeSum)} ${suStr} for the upload.`); 
   },
-  reportPayment: (payment) => { 
-    console.log(`${role == 'customer' ? 'You' : 'The customer'} paid ${toSU(payment)} ${suStr} to the contract.`) 
+  reportReady: (price) => { //card has been published for viewing by customers
+    console.log(`${role == 'owner' ? 'Your' : 'A new'} Yu-Gi-Oh card is now for sale at ${toSU(price)} ${suStr}.`);
   },
-  reportTransfer: (payment) => { console.log(`The contract paid ${toSU(payment)} ${suStr} to ${role == 'owner' ? 'you' : 'the owner'}.`) },
-});
+  reportPayment: (price) => {
+    console.log(`${role == 'customer' ? 'You' : 'The customer'} paid ${toSU(price)} ${suStr} for the card.`); 
+  },
+  reportTransfer: () => {
+    console.log(`${role == 'owner' ? 'You' : 'The owner'} received the payment.`); 
+  },
+}
 
-// Owner of the NFT
-if (role === 'owner') {
-  
-  const accO = await stdlib.newTestAccount(startingBalance);
-  await showBalance(accO);
-  console.log("");
-
-  const ctc = accO.contract(backend);
-
-  const ownerInteract = {
-    ...commonInteract(role),
-    reportFee: (fee) => console.log(`The fee for uploading your card is ${fee} %.`),
-    price: () => ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res)),
-    name: () => ask.ask(`What is the name of your card ? :`, (a) => {return a;}),
-    size: () => {
-      const a = ask.ask(`What is the size of your card ? :`, (a) => {return a;});
-      return a;
-    },
-    hey: async () => {
-      console.log(`hey`);
-      console.log(`Contract info: ${JSON.stringify(await ctc.getInfo())}`);
-    },
-    getSale: async (nftname) => {
-
-      console.log("");
-
-      console.log(`Uploading Yu-Gi-Oh card...`);
-      console.log(`${nftname}`);
-      console.log(`${typeof nftname}`);
-      const copy = nftname.toString().slice();
-      console.log(copy);
-      console.log(`${typeof copy}`);
-      const theNFT = await stdlib.launchToken(accO, `${nftname}`, "NFT", { supply: 1 });
-      console.log("Upload succesful!")
-
-      console.log("");
-
-      return theNFT.id;
-    },
-    reportReady: async (price) => {
-      console.log(`Your Yu-Gi-Oh card is for sale at ${toSU(price)} ${suStr}.`);
-      console.log(`Contract info: ${JSON.stringify(await ctc.getInfo())}`);
-    },
-    calculateFee: (fee, lenInBlocks) => {
-      const feeSum = Math.floor(fee/100*lenInBlocks);
-      console.log(`You have to pay ${feeSum} ${suStr} to upload your card.`);
-      return feeSum;
-    },
-    reportRetrieval: () => {console.log("The card is your possession.");},
-  };
-
-  await ctc.participants.Owner(ownerInteract);
-  await showBalance(accO);
-
-// Customer (can be buying or lending)
-} else if (role === 'customer') {
+if (role === 'admin') {
   const acc = await stdlib.newTestAccount(startingBalance);
-  const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
-
-  const customerInteract = {
-    ...commonInteract(role),
-    seeParams: async (name, nftId, reservePrice) => {
-      console.log(`The card is ${name} (id number ${nftId}) and the price is ${stdlib.formatCurrency(reservePrice)}.`);
-      await acc.tokenAccept(nftId);
-    },
-    confirmPurchase: async (price) => {
-      const buy = await ask.ask(`Do you want to purchase this card for ${toSU(price)} ${suStr}?`, ask.yesno);
-      return buy;
-    },
-    leave: async (nftId) => {
-      console.log(typeof anNFT);
-      console.log(anNFT);
-      console.log(anNFT.id);
-      console.log(anNFT === anNFT.id);
-      await anNFT.id.optOut(acc);
-      leaving = true;},
-    reportCard: (card) => console.log(`You can now use your new ${card} card !`),
-  };
-  
-  const ctc = acc.contract(backend, info);
+  const ctc = acc.contract(backend); //creating the contract
   await showBalance(acc);
   console.log("");
-  await ctc.p.Customer(customerInteract);
 
-
-  await showBalance(acc);
-} else { //administrator (needs to get a fee for people using the website)
+  const fee = await ask.ask(`What percentage would you like for the fee ? (in %)`, (a) => (a));
   
-  
-
   const adminInteract = {
     ...commonInteract,
-    publishFee: async () => await ask.ask(`What percentage would you like for the fee ? (in %)`, (a) => (a))
+    publishContract: async () => {
+      console.log(`Contract info: ${JSON.stringify(await ctc.getInfo())}`);
+    },
+    publishFee: async () => {
+      return fee;},
   };
 
+  await ctc.p.Administrator(adminInteract); //deploy the contract
+
+  await showBalance(acc);
+} else if (role === 'owner') {
   const acc = await stdlib.newTestAccount(startingBalance);
-  const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
-  const ctc = acc.contract(backend, info);
   await showBalance(acc);
   console.log("");
-  await ctc.p.Administrator(adminInteract);
-};
+  const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
+  const ctc = acc.contract(backend, info); //retrieve contract deployed by admin
+
+  //check fee (percentage) published by admin
+  const maybeFee = await ctc.views.Main.feePer();
+  const fee = (maybeFee[0] == 'None' ? 0 : maybeFee[1]);
+
+  //ask for title, price and size
+  const title = await ask.ask(`What is the name of your card ? :`, (a) => {return a;});
+  const price = await ask.ask(`How much are you selling your card for (in ${suStr}) ? :`, (res) => (res));
+  const size = await ask.ask(`What is the size of your card ? :`, (a) => {return a;}); //Has to be a number
+
+  //calculate fee to pay for uploading
+  const feeSum = Math.floor(fee/100*size);
+
+  //ask if upload or not
+  const shouldUpload = await ask.ask(`Do you you want to upload your card for ${feeSum} ${suStr} ? `, ask.yesno);
+
+  //Uploading procedure
+  if (shouldUpload) {
+    //define interactions
+    const ownerInteract = {
+      ...commonInteract,
+      communicateFee: async () => {return stdlib.parseCurrency(feeSum);}, //give fee to backend for payment
+      upload: async () => {
+        console.log(`Uploading your card...`);
+        const theNFT = await stdlib.launchToken(acc, title, "NFT", { supply: 1 });
+        return theNFT.id;
+      },
+      reportUpload: () => { //card was given to the contract
+        console.log("Upload succesful!")
+        return [title, price, size];
+      },
+    };
+    //connect to the contract
+    await ctc.participants.Owner(ownerInteract); //owner enters the contract
+    await showBalance(acc);
+  } else {
+    console.log(`You canceled the upload.`);
+  }
+
+} else { //customer
+  const acc = await stdlib.newTestAccount(startingBalance);
+  await showBalance(acc);
+  console.log("");
+  const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
+  const ctc = acc.contract(backend, info); //retrieve contract deployed by admin
+
+  //check details of available card
+  const maybeOwner = await ctc.views.NFT.owner();
+  const owner = (maybeOwner[0] == 'None' ? 0 : maybeOwner[1]);
+  const maybeId = await ctc.views.NFT.id();
+  const id = (maybeId[0] == 'None' ? 0 : maybeId[1]);
+  const maybeTitle = await ctc.views.NFT.title();
+  const title = (maybeTitle[0] == 'None' ? 0 : maybeTitle[1]);
+  const maybePrice = await ctc.views.NFT.price();
+  const price = (maybePrice[0] == 'None' ? 0 : maybePrice[1]);
+  const maybeSize = await ctc.views.NFT.size();
+  const size = (maybeSize[0] == 'None' ? 0 : maybeSize[1]);
+
+  console.log(`A new card is available! Here are the details:`);
+  console.log("");
+  console.log(`Name : ${title}`);
+  console.log(`Price : ${price} ${suStr}`);
+  console.log(`Size : ${size}`);
+  console.log(`ID : ${id}`);
+  console.log(`Owned by : ${owner}`);
+  console.log("");
+  const shouldBuy = await ask.ask(`Do you want to purchase this card ?`, ask.yesno);
+
+  //should buy?
+  if (shouldBuy) {
+    //define interactions
+    const customerInteract = {
+      ...commonInteract,
+      reportPurchase: (title) => {
+        console.log(`You can now use your new ${title} card !`);
+      },
+    };
+    //connect to the contract
+    await ctc.participants.Customer(customerInteract); //owner enters the contract
+    await showBalance(acc);
+  }
+
+
+}
 
 ask.done();
-
-
