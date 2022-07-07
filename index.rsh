@@ -24,6 +24,7 @@ const ownerInteract = {
 
 const customerInteract = {
     ...commonInteract,
+    optin: Fun([Token], Null),
     reportPurchase: Fun([Bytes(32)], Null),
 }
 
@@ -94,6 +95,7 @@ export const main = Reach.App(() => {
     each([O, A], () => interact.reportReady(price));
 
     //we suppose the customer wants to buy the card
+    C.only(() => interact.optin(nftId));
     C.pay(price); //customer pays to the transaction
     each([O, C], () => interact.reportPayment(price));
     transfer(price).to(O); //owner receives the payment

@@ -92,7 +92,7 @@ if (role === 'admin') {
       },
       reportUpload: () => { //card was given to the contract
         console.log("Upload succesful!")
-        return [title, price, size];
+        return [title, stdlib.parseCurrency(price), size];
       },
     };
     //connect to the contract
@@ -124,7 +124,7 @@ if (role === 'admin') {
   console.log(`A new card is available! Here are the details:`);
   console.log("");
   console.log(`Name : ${title}`);
-  console.log(`Price : ${price} ${suStr}`);
+  console.log(`Price : ${toSU(price)} ${suStr}`);
   console.log(`Size : ${size}`);
   console.log(`ID : ${id}`);
   console.log(`Owned by : ${owner}`);
@@ -136,12 +136,13 @@ if (role === 'admin') {
     //define interactions
     const customerInteract = {
       ...commonInteract,
+      optin: (nftId) => {acc.tokenAccept(nftId);},
       reportPurchase: (title) => {
         console.log(`You can now use your new ${title} card !`);
       },
     };
     //connect to the contract
-    await ctc.participants.Customer(customerInteract); //owner enters the contract
+    await ctc.participants.Customer(customerInteract); //customer enters the contract
     await showBalance(acc);
   }
 
