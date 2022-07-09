@@ -1,4 +1,5 @@
 import { loadStdlib } from '@reach-sh/stdlib';
+//import { ALGO_MyAlgoConnect as MyAlgoConnect } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 import { ask } from '@reach-sh/stdlib';
 
@@ -12,6 +13,8 @@ const role = process.argv[2];
 console.log(`Your role is ${role}.`);
 
 const stdlib = loadStdlib(process.env);
+//stdlib.setWalletFallback(stdlib.walletFallback({providerEnv: 'TestNet', MyAlgoConnect }));
+stdlib.setProviderByName('TestNet');
 console.log(`The consensus network is ${stdlib.connector}.`);
 
 //functions for handling (representations of) currencies
@@ -20,7 +23,7 @@ const toSU = (au) => stdlib.formatCurrency(au, 4);
 const suStr = stdlib.standardUnit;
 const auStr = stdlib.atomicUnit;
 const showBalance = async (acc) => console.log(`Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`);
-const startingBalance = stdlib.parseCurrency(100); //converted to microAlgos
+const startingBalance = stdlib.parseCurrency(5); //converted to microAlgos
 
 const commonInteract = {
   reportFeeTransfer: (feeSum) => {
@@ -38,7 +41,12 @@ const commonInteract = {
 }
 
 if (role === 'admin') {
-  const acc = await stdlib.newTestAccount(startingBalance);
+  //const acc = await stdlib.newTestAccount(100);
+  //const secret = await ask.ask(`What is your account secret?`, (x => x));
+  const acc = await stdlib.newTestAccount(1000000);;
+  //const acc = await stdlib.newAccountFromMnemonic('enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice');
+  console.log("heydo");
+  console.log(acc);
   const ctc = acc.contract(backend); //creating the contract
   await showBalance(acc);
   console.log("");
@@ -58,7 +66,10 @@ if (role === 'admin') {
 
   await showBalance(acc);
 } else if (role === 'owner') {
-  const acc = await stdlib.newTestAccount(startingBalance);
+  const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
+  console.log("heydo");
+  const faucet = await stdlib.getFaucet();
+  stdlib.transfer(faucet, acc, stdlib.parseCurrency(5));
   await showBalance(acc);
   console.log("");
   const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
