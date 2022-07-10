@@ -16,17 +16,11 @@ const suStr = stdlib.standardUnit;
 const auStr = stdlib.atomicUnit;
 
 const showBalance = async (acc) =>
-console.log(
-  `Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`
-);
+  console.log(`Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`);
 
 const commonInteract = {
   reportFeeTransfer: (feeSum) => {
-    console.log(
-      `The owner paid ${toSU(
-        feeSum
-      )} ${suStr} for the upload.`
-    );
+    console.log(`The owner paid ${toSU(feeSum)} ${suStr} for the upload.`);
   },
   reportReady: (price) => {
     //card has been published for viewing by customers
@@ -35,21 +29,25 @@ const commonInteract = {
     );
   },
   reportPayment: (price) => {
-    console.log(
-      `THe customer paid ${toSU(
-        price
-      )} ${suStr} for the card.`
-    );
+    console.log(`THe customer paid ${toSU(price)} ${suStr} for the card.`);
   },
   reportTransfer: () => {
-    console.log(
-      `The owner received the payment.`
-    );
+    console.log(`The owner received the payment.`);
   },
 };
 
 async function adminRun(feeToGive) {
-  const role = 'admin';
+  const toAU = (su) => stdlib.parseCurrency(su);
+  const toSU = (au) => stdlib.formatCurrency(au, 4);
+  const suStr = stdlib.standardUnit;
+  const auStr = stdlib.atomicUnit;
+
+  const showBalance = async (acc) =>
+    console.log(
+      `Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`
+    );
+
+  const role = "admin";
   console.log(`Your role is ${role}.`);
 
   const stdlib = loadStdlib(process.env);
@@ -62,7 +60,8 @@ async function adminRun(feeToGive) {
   //const secret = await ask.ask(`What is your account secret?`, (x => x));
   //const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
 
-  const acc = await stdlib.newAccountFromMnemonic( //TODO change here later
+  const acc = await stdlib.newAccountFromMnemonic(
+    //TODO change here later
     "enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice"
   );
   //console.log(acc);
@@ -172,8 +171,6 @@ async function runOwner(contractInfo, cardName, Price, image) {
 }
 
 async function runCustomer(contractInfo) {
-  7;
-
   const role = process.argv[2];
   console.log(`Your role is ${role}.`);
 
@@ -275,3 +272,5 @@ async function confirmBuy(acc) {
   await ctc.participants.Customer(customerInteract); //customer enters the contract
   await showBalance(acc);
 }
+
+export default adminRun;
