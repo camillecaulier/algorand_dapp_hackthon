@@ -43,10 +43,10 @@ const commonInteract = {
 if (role === 'admin') {
   //const acc = await stdlib.newTestAccount(100);
   //const secret = await ask.ask(`What is your account secret?`, (x => x));
-  const acc = await stdlib.newTestAccount(1000000);;
-  //const acc = await stdlib.newAccountFromMnemonic('enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice');
+  //const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
+  const acc = await stdlib.newAccountFromMnemonic('enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice');
   console.log("heydo");
-  console.log(acc);
+  //console.log(acc);
   const ctc = acc.contract(backend); //creating the contract
   await showBalance(acc);
   console.log("");
@@ -66,10 +66,11 @@ if (role === 'admin') {
 
   await showBalance(acc);
 } else if (role === 'owner') {
-  const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
+  const acc = await stdlib.newAccountFromMnemonic('resemble excuse economy protect brown return twenty library river page like enable sight height bottom novel foam purse ball boost basket toy excess above marriage');
   console.log("heydo");
-  const faucet = await stdlib.getFaucet();
-  stdlib.transfer(faucet, acc, stdlib.parseCurrency(5));
+  //const faucet = await stdlib.getFaucet();
+  //stdlib.transfer(faucet, acc, stdlib.parseCurrency(5));
+  console.log("heyhey");
   await showBalance(acc);
   console.log("");
   const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
@@ -114,7 +115,7 @@ if (role === 'admin') {
   }
 
 } else { //customer
-  const acc = await stdlib.newTestAccount(startingBalance);
+  const acc = await stdlib.newAccountFromMnemonic('enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice');
   await showBalance(acc);
   console.log("");
   const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
