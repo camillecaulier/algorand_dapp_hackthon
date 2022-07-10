@@ -45,7 +45,6 @@ if (role === 'admin') {
   //const secret = await ask.ask(`What is your account secret?`, (x => x));
   //const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
   const acc = await stdlib.newAccountFromMnemonic('enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice');
-  console.log("heydo");
   //console.log(acc);
   const ctc = acc.contract(backend); //creating the contract
   await showBalance(acc);
@@ -67,10 +66,8 @@ if (role === 'admin') {
   await showBalance(acc);
 } else if (role === 'owner') {
   const acc = await stdlib.newAccountFromMnemonic('resemble excuse economy protect brown return twenty library river page like enable sight height bottom novel foam purse ball boost basket toy excess above marriage');
-  console.log("heydo");
   //const faucet = await stdlib.getFaucet();
   //stdlib.transfer(faucet, acc, stdlib.parseCurrency(5));
-  console.log("heyhey");
   await showBalance(acc);
   console.log("");
   const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
@@ -119,7 +116,18 @@ if (role === 'admin') {
   await showBalance(acc);
   console.log("");
   const info = await ask.ask('Paste contract info:', (s) => JSON.parse(s));
-  const ctc = acc.contract(backend, info); //retrieve contract deployed by admin
+  var ctc = acc.contract(backend, info); //retrieve contract deployed by admin
+
+  var hm = await ctc.views.NFT.owner();
+  console.log(hm);
+  console.log(hm[0]);
+  console.log(hm[1]);
+
+  while (hm[0] === 'None') {
+    ctc = acc.contract(backend, info);
+    var hm = await ctc.views.NFT.owner();
+    if (hm[0] != 'None') break;
+  }
 
   //check details of available card
   const maybeOwner = await ctc.views.NFT.owner();
