@@ -9,10 +9,21 @@ import { ask } from "@reach-sh/stdlib";
 //   process.exit(0);
 // }
 
+//functions for handling (representations of) currencies
+const toAU = (su) => stdlib.parseCurrency(su);
+const toSU = (au) => stdlib.formatCurrency(au, 4);
+const suStr = stdlib.standardUnit;
+const auStr = stdlib.atomicUnit;
+
+const showBalance = async (acc) =>
+console.log(
+  `Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`
+);
+
 const commonInteract = {
   reportFeeTransfer: (feeSum) => {
     console.log(
-      `${role == "owner" ? "You" : "The owner"} paid ${toSU(
+      `The owner paid ${toSU(
         feeSum
       )} ${suStr} for the upload.`
     );
@@ -20,27 +31,25 @@ const commonInteract = {
   reportReady: (price) => {
     //card has been published for viewing by customers
     console.log(
-      `${
-        role == "owner" ? "Your" : "A new"
-      } Yu-Gi-Oh card is now for sale at ${toSU(price)} ${suStr}.`
+      `A new Yu-Gi-Oh card is now for sale at ${toSU(price)} ${suStr}.`
     );
   },
   reportPayment: (price) => {
     console.log(
-      `${role == "customer" ? "You" : "The customer"} paid ${toSU(
+      `THe customer paid ${toSU(
         price
       )} ${suStr} for the card.`
     );
   },
   reportTransfer: () => {
     console.log(
-      `${role == "owner" ? "You" : "The owner"} received the payment.`
+      `The owner received the payment.`
     );
   },
 };
 
 async function adminRun(feeToGive) {
-  const role = process.argv[2];
+  const role = 'admin';
   console.log(`Your role is ${role}.`);
 
   const stdlib = loadStdlib(process.env);
@@ -48,20 +57,12 @@ async function adminRun(feeToGive) {
   stdlib.setProviderByName("TestNet");
   console.log(`The consensus network is ${stdlib.connector}.`);
 
-  //functions for handling (representations of) currencies
-  const toAU = (su) => stdlib.parseCurrency(su);
-  const toSU = (au) => stdlib.formatCurrency(au, 4);
-  const suStr = stdlib.standardUnit;
-  const auStr = stdlib.atomicUnit;
-  const showBalance = async (acc) =>
-    console.log(
-      `Your balance is ${toSU(await stdlib.balanceOf(acc))} ${suStr}.`
-    );
-  const startingBalance = stdlib.parseCurrency(5); //converted to microAlgos
+  //const startingBalance = stdlib.parseCurrency(5); //converted to microAlgos
   //const acc = await stdlib.newTestAccount(100);
   //const secret = await ask.ask(`What is your account secret?`, (x => x));
   //const acc = await stdlib.newTestAccount(stdlib.parseCurrency(0.1));
-  const acc = await stdlib.newAccountFromMnemonic(
+
+  const acc = await stdlib.newAccountFromMnemonic( //TODO change here later
     "enforce captain dad public coffee maple still stereo outdoor whip shuffle inflict health oval embrace civil city marble barrel argue top broccoli report abstract rice"
   );
   //console.log(acc);
