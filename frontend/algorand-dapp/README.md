@@ -68,3 +68,57 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### information for the admin
+
+decides the fee
+receives the constract info
+
+### owner
+
+Your role is owner.
+The consensus network is ALGO.
+heydo
+heyhey
+Your balance is 22.658 ALGO.
+
+Paste contract info:
+{"type":"BigNumber","hex":"0x05e7e86c"}
+What is the name of your card ? :
+Yugi Moto
+How much are you selling your card for (in ALGO) ? :
+3
+What is the size of your card ? :
+2
+Do you you want to upload your card for 2 ALGO ? => submit
+y
+You paid 2 ALGO for the upload.
+Uploading your card...
+Upload succesful!
+Your Yu-Gi-Oh card is now for sale at 3 ALGO.
+The customer paid 3 ALGO for the card.
+You received the payment.
+Your balance is 23.546 ALGO.
+
+### customer
+
+Your role is customer.
+The consensus network is ALGO.
+Your balance is 18.066 ALGO.
+
+Paste contract info:
+{"type":"BigNumber","hex":"0x05e7e86c"}
+A new card is available! Here are the details:
+
+Name : Yugi Moto
+Price : 3 ALGO
+Size : 2
+ID : 99084494
+Owned by : 0x37f439601f95bb085a6f9a0fe6dc1c1227d44b5fe4e8a6a161277c132905889c
+
+Do you want to purchase this card ?
+y
+You paid 3 ALGO for the card.
+The owner received the payment.
+You can now use your new Yugi Moto card !
+Your balance is 15.259 ALGO.
